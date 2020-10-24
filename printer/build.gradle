@@ -1,0 +1,53 @@
+plugins {
+    id 'com.android.library'
+    id 'com.github.dcendents.android-maven'
+    id 'kotlin-android'
+    id 'kotlin-android-extensions'
+}
+
+group='com.github.sehentak'
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "30.0.2"
+
+    defaultConfig {
+        minSdkVersion 19
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0"
+
+        consumerProguardFiles "consumer-rules.pro"
+
+        buildConfigField "String", "RELEASE_DATE", "\"${getDate()}\""
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation 'androidx.core:core-ktx:1.3.2'
+    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'com.github.davidmoten:word-wrap:0.1.6'
+    implementation files('libs/btsdk.jar')
+}
+
+static def getDate() {
+    def date = new Date()
+    def formattedDate = date.format('yyyy-MM-dd HH:mm:ss')
+    return formattedDate
+}

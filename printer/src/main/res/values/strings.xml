@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">Sehentak Printer Service</string>
+
+    <string name="label_currency">Rp</string>
+    <string name="label_total">Total</string>
+    <string name="label_total_sub">Subtotal</string>
+
+    <string name="label_cabang">Cabang</string>
+    <string name="label_branch">Branch</string>
+
+    <string name="const_d132" translatable="false">--------------------------------</string>
+    <string name="const_d232" translatable="false">================================</string>
+</resources>
