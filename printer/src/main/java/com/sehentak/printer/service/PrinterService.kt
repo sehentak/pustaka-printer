@@ -10,7 +10,6 @@ import android.os.IBinder
 import android.text.TextUtils
 import android.util.Log
 import androidx.annotation.RequiresPermission
-import com.sehentak.printer.App.Companion.mContext
 import com.sehentak.printer.BuildConfig
 import com.sehentak.printer.R
 import com.sehentak.printer.base.func.BluetoothService
@@ -20,7 +19,6 @@ import com.sehentak.printer.model.PrintDataMdl
 import org.davidmoten.text.utils.WordWrap
 import java.text.NumberFormat
 import java.util.*
-
 
 class PrinterService: Service() {
     private val mTagClass = this::class.java.simpleName
@@ -66,13 +64,13 @@ class PrinterService: Service() {
     }
 
     fun sendData(printData: PrintDataMdl) {
-        val d132 = mContext.getString(R.string.const_d132)
-        val d232 = mContext.getString(R.string.const_d232)
+        val d132 = applicationContext.getString(R.string.const_d132)
+        val d232 = applicationContext.getString(R.string.const_d232)
 
         var title = printData.header?.title
         if (title != null && !TextUtils.isEmpty(title)) {
-            val flagCabang = mContext.getString(R.string.label_cabang)
-            val flagBranch = mContext.getString(R.string.label_branch)
+            val flagCabang = applicationContext.getString(R.string.label_cabang)
+            val flagBranch = applicationContext.getString(R.string.label_branch)
             val branchFlag: String? = when {
                 title.contains(flagCabang) -> flagCabang
                 title.contains(flagBranch) -> flagBranch
@@ -166,7 +164,7 @@ class PrinterService: Service() {
         if (tax == zero && service == zero && discount == zero) {
             val total = printData.calculation?.priceFinal
             if (total != null && !TextUtils.isEmpty(total.toString())) {
-                var label = mContext.getString(R.string.label_total)
+                var label = applicationContext.getString(R.string.label_total)
                 val lengthS = 18 - label.length
                 label = "$label${filler(lengthS)}"
 
@@ -174,7 +172,7 @@ class PrinterService: Service() {
                 val lengthT = 10 - price.length
                 price = "${filler(lengthT)}$price"
 
-                val currency = mContext.getString(R.string.label_currency)
+                val currency = applicationContext.getString(R.string.label_currency)
                 val mSubTotal = "$label  $currency$price"
 
                 sendData(mSubTotal.toByteArray(charset("GBK")))
@@ -184,7 +182,7 @@ class PrinterService: Service() {
         } else {
             val subTotal = printData.calculation?.priceBasic
             if (subTotal != null && !TextUtils.isEmpty(subTotal.toString())) {
-                var label = mContext.getString(R.string.label_total_sub)
+                var label = applicationContext.getString(R.string.label_total_sub)
                 val lengthS = 18 - label.length
                 label = "$label${filler(lengthS)}"
 
@@ -192,7 +190,7 @@ class PrinterService: Service() {
                 val lengthT = 10 - price.length
                 price = "${filler(lengthT)}$price"
 
-                val currency = mContext.getString(R.string.label_currency)
+                val currency = applicationContext.getString(R.string.label_currency)
                 val mSubTotal = "$label  $currency$price"
 
                 sendData(mSubTotal.toByteArray(charset("GBK")))
