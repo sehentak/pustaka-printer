@@ -352,7 +352,7 @@ class PrinterService: Service() {
 
     @Suppress("DEPRECATION")
     private val mHandler2: Handler get() {
-        if (!::instanceHandler.isInitialized) {
+        if (!::instanceHandler2.isInitialized) {
             instanceHandler2 = Handler()
         }
         return instanceHandler2
