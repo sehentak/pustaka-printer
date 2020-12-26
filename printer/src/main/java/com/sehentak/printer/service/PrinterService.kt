@@ -207,7 +207,12 @@ class PrinterService: Service() {
                     context.sendData(d132.toByteArray(charset("GBK")))
                     context.sendData("\n".toByteArray(charset("GBK")))
                 }
+            }
 
+            val text = printData.text
+            if (text.isNotEmpty()) for (item in text) {
+                val iText = center(item, 32)
+                context.sendData(iText?.toByteArray(charset("GBK")))
             }
 
             var footer = printData.footer?.note
