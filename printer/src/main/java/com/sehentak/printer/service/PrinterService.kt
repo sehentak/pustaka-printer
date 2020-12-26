@@ -64,13 +64,17 @@ class PrinterService: Service() {
     }
 
     fun sendData(printData: PrintDataMdl) {
-        val d132 = applicationContext.getString(R.string.const_d132)
-        val d232 = applicationContext.getString(R.string.const_d232)
+        sendData(applicationContext, printData)
+    }
+
+    fun sendData(context: Context, printData: PrintDataMdl) {
+        val d132 = context.getString(R.string.const_d132)
+        val d232 = context.getString(R.string.const_d232)
 
         var title = printData.header?.title
         if (title != null && !TextUtils.isEmpty(title)) {
-            val flagCabang = applicationContext.getString(R.string.label_cabang)
-            val flagBranch = applicationContext.getString(R.string.label_branch)
+            val flagCabang = context.getString(R.string.label_cabang)
+            val flagBranch = context.getString(R.string.label_branch)
             val branchFlag: String? = when {
                 title.contains(flagCabang) -> flagCabang
                 title.contains(flagBranch) -> flagBranch
@@ -164,7 +168,7 @@ class PrinterService: Service() {
         if (tax == zero && service == zero && discount == zero) {
             val total = printData.calculation?.priceFinal
             if (total != null && !TextUtils.isEmpty(total.toString())) {
-                var label = applicationContext.getString(R.string.label_total)
+                var label = context.getString(R.string.label_total)
                 val lengthS = 18 - label.length
                 label = "$label${filler(lengthS)}"
 
@@ -172,7 +176,7 @@ class PrinterService: Service() {
                 val lengthT = 10 - price.length
                 price = "${filler(lengthT)}$price"
 
-                val currency = applicationContext.getString(R.string.label_currency)
+                val currency = context.getString(R.string.label_currency)
                 val mSubTotal = "$label  $currency$price"
 
                 sendData(mSubTotal.toByteArray(charset("GBK")))
@@ -182,7 +186,7 @@ class PrinterService: Service() {
         } else {
             val subTotal = printData.calculation?.priceBasic
             if (subTotal != null && !TextUtils.isEmpty(subTotal.toString())) {
-                var label = applicationContext.getString(R.string.label_total_sub)
+                var label = context.getString(R.string.label_total_sub)
                 val lengthS = 18 - label.length
                 label = "$label${filler(lengthS)}"
 
@@ -190,7 +194,7 @@ class PrinterService: Service() {
                 val lengthT = 10 - price.length
                 price = "${filler(lengthT)}$price"
 
-                val currency = applicationContext.getString(R.string.label_currency)
+                val currency = context.getString(R.string.label_currency)
                 val mSubTotal = "$label  $currency$price"
 
                 sendData(mSubTotal.toByteArray(charset("GBK")))
