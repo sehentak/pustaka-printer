@@ -3,6 +3,8 @@ package com.sehentak.printer.model
 import com.google.gson.annotations.SerializedName
 
 data class PrintDataMdl(
+    @SerializedName("print_address")
+    var address: String? = null,
     @SerializedName("print_logo")
     var logo: String? = null,
     @SerializedName("print_header")

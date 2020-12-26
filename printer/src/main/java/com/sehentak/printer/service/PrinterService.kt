@@ -22,9 +22,10 @@ import java.util.*
 
 class PrinterService: Service() {
     private val mTagClass = this::class.java.simpleName
-    private lateinit var instanceHandler: Handler
     private lateinit var mBluetoothAdapter: BluetoothAdapter
     private lateinit var instancePrinterService: BluetoothService
+    private lateinit var instanceHandler: Handler
+    private lateinit var instanceHandler2: Handler
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (BuildConfig.DEBUG) Log.e(mTagClass, "start: $startId")
@@ -40,24 +41,22 @@ class PrinterService: Service() {
         mService.stop()
     }
 
-    @Suppress("DEPRECATION")
-    @RequiresPermission(anyOf = [Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN])
     fun init(bluetoothAddress: String?): BluetoothService {
+        return init(applicationContext, bluetoothAddress)
+    }
+
+    @RequiresPermission(anyOf = [Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN])
+    fun init(context: Context, bluetoothAddress: String?): BluetoothService {
         if (bluetoothAddress != null && !TextUtils.isEmpty(bluetoothAddress)) {
+            context.saveAddress(bluetoothAddress)
             mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
             if (mBluetoothAdapter.isEnabled) {
                 mService.start()
-                Handler().postDelayed({
+                mHandler2.postDelayed({
                     val device = mBluetoothAdapter.getRemoteDevice(bluetoothAddress)
                     mService.connect(device)
                 }, 500)
             }
-
-            if (BuildConfig.DEBUG) {
-                Log.e(mTagClass, mBluetoothAdapter.isEnabled.toString())
-            }
-
-            if (mService.state == 3) address = bluetoothAddress
         }
 
         return mService
@@ -277,7 +276,7 @@ class PrinterService: Service() {
             if (data != null && mBluetoothAdapter.isEnabled) {
                 if (mService.state == 3) mService.write(data)
                 else {
-                    init(address)
+                    init(getAddress())
                     if (BuildConfig.DEBUG) {
                         Log.e(mTagClass, "Device not connected")
                     }
@@ -351,6 +350,14 @@ class PrinterService: Service() {
         return instanceHandler
     }
 
+    @Suppress("DEPRECATION")
+    private val mHandler2: Handler get() {
+        if (!::instanceHandler.isInitialized) {
+            instanceHandler2 = Handler()
+        }
+        return instanceHandler2
+    }
+
     private val mService: BluetoothService get() {
         if (!::instancePrinterService.isInitialized) {
             instancePrinterService = BluetoothService(baseContext, mHandler)
@@ -358,15 +365,16 @@ class PrinterService: Service() {
         return instancePrinterService
     }
 
-    private var Context.address: String?
-        get() {
-            val prefs = getSharedPreferences(mTagClass, Context.MODE_PRIVATE)
-            return prefs.getString("address", null)
-        }
-
-        set(address) {
+    private fun Context.saveAddress(address: String?) {
+        if (address != null) {
             val editor = getSharedPreferences(mTagClass, Context.MODE_PRIVATE).edit()
             editor.putString("address", address)
             editor.apply()
         }
+    }
+
+    private fun Context.getAddress(): String? {
+        val prefs = getSharedPreferences(mTagClass, Context.MODE_PRIVATE)
+        return prefs.getString("address", null)
+    }
 }
