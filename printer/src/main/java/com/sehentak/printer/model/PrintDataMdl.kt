@@ -14,5 +14,7 @@ data class PrintDataMdl(
     @SerializedName("print_calculation")
     var calculation: PrintCalculationMdl? = null,
     @SerializedName("print_footer")
-    var footer: PrintFooterMdl? = null
+    var footer: PrintFooterMdl? = null,
+    @SerializedName("print_text")
+    var text: List<String> = mutableListOf()
 )
