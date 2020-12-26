@@ -57,7 +57,7 @@ class PrinterService: Service() {
                 Log.e(mTagClass, mBluetoothAdapter.isEnabled.toString())
             }
 
-            if (mService.state == 3) bluetoothAddress.saveAddress()
+            if (mService.state == 3) address = bluetoothAddress
         }
 
         return mService
@@ -97,52 +97,52 @@ class PrinterService: Service() {
 
                     subTitle = center(subTitle, 32).toString()
 
-                    sendData(title)
+                    context.sendData(title)
 
                     val align: Byte = 0x00
-                    sendData(align)
-                    sendData(subTitle.toByteArray(charset("GBK")))
-                    sendData("\n")
+                    context.sendData(align)
+                    context.sendData(subTitle.toByteArray(charset("GBK")))
+                    context.sendData("\n")
                 } else {
                     title = center(title, 16)
-                    sendData(title)
+                    context.sendData(title)
                 }
             }
 
             val align: Byte = 0x00
-            sendData(align)
+            context.sendData(align)
 
             var address = printData.header?.subtitle
             if (address != null && !TextUtils.isEmpty(address)) {
                 address = center(address, 32)
-                sendData(address?.toByteArray(charset("GBK")))
-                sendData(d232.toByteArray(charset("GBK")))
-                sendData("\n".toByteArray(charset("GBK")))
+                context.sendData(address?.toByteArray(charset("GBK")))
+                context.sendData(d232.toByteArray(charset("GBK")))
+                context.sendData("\n".toByteArray(charset("GBK")))
             }
 
             var invoice = printData.header?.invoice
             if (invoice != null && !TextUtils.isEmpty(invoice)) {
                 val fLength = 32 - invoice.length
                 invoice = "${filler(fLength)}$invoice"
-                sendData(invoice.toByteArray(charset("GBK")))
+                context.sendData(invoice.toByteArray(charset("GBK")))
             }
 
             var dateTrx = printData.header?.date
             if (dateTrx != null && !TextUtils.isEmpty(dateTrx)) {
                 val fLength = 32 - dateTrx.length
                 dateTrx = "${filler(fLength)}$dateTrx"
-                sendData(dateTrx.toByteArray(charset("GBK")))
+                context.sendData(dateTrx.toByteArray(charset("GBK")))
             }
 
             var operator = printData.header?.operator
             if (operator != null && !TextUtils.isEmpty(operator)) {
                 val fLength = 32 - operator.length
                 operator = "${filler(fLength)}$operator"
-                sendData(operator.toByteArray(charset("GBK")))
+                context.sendData(operator.toByteArray(charset("GBK")))
             }
 
-            sendData("\n")
-            sendData(align)
+            context.sendData("\n")
+            context.sendData(align)
             val products = printData.receipts
             if (!products.isNullOrEmpty()) for (item in products) {
                 val tPrice = item.priceTotal.toCurrencyFormat()
@@ -161,11 +161,11 @@ class PrinterService: Service() {
                 val cIndex = "$tIndex${filler(fIndex)}"
 
                 val compose = "$cIndex$cQuantity$cPrice"
-                sendData(compose.toByteArray(charset("GBK")))
+                context.sendData(compose.toByteArray(charset("GBK")))
             }
 
-            sendData(d132.toByteArray(charset("GBK")))
-            sendData("\n".toByteArray(charset("GBK")))
+            context.sendData(d132.toByteArray(charset("GBK")))
+            context.sendData("\n".toByteArray(charset("GBK")))
 
             val zero: Long = 0
             val tax = printData.calculation?.priceTax ?: 0
@@ -186,9 +186,9 @@ class PrinterService: Service() {
                     val currency = context.getString(R.string.label_currency)
                     val mSubTotal = "$label  $currency$price"
 
-                    sendData(mSubTotal.toByteArray(charset("GBK")))
-                    sendData(d132.toByteArray(charset("GBK")))
-                    sendData("\n".toByteArray(charset("GBK")))
+                    context.sendData(mSubTotal.toByteArray(charset("GBK")))
+                    context.sendData(d132.toByteArray(charset("GBK")))
+                    context.sendData("\n".toByteArray(charset("GBK")))
                 }
             } else {
                 val subTotal = printData.calculation?.priceBasic
@@ -204,30 +204,30 @@ class PrinterService: Service() {
                     val currency = context.getString(R.string.label_currency)
                     val mSubTotal = "$label  $currency$price"
 
-                    sendData(mSubTotal.toByteArray(charset("GBK")))
-                    sendData(d132.toByteArray(charset("GBK")))
-                    sendData("\n".toByteArray(charset("GBK")))
+                    context.sendData(mSubTotal.toByteArray(charset("GBK")))
+                    context.sendData(d132.toByteArray(charset("GBK")))
+                    context.sendData("\n".toByteArray(charset("GBK")))
                 }
 
             }
 
             var footer = printData.footer?.note
             if (footer != null && !TextUtils.isEmpty(footer)) {
-                sendData("\n".toByteArray(charset("GBK")))
-                sendData(d232.toByteArray(charset("GBK")))
+                context.sendData("\n".toByteArray(charset("GBK")))
+                context.sendData(d232.toByteArray(charset("GBK")))
 
                 footer = center(footer, 32)
-                sendData(footer?.toByteArray(charset("GBK")))
+                context.sendData(footer?.toByteArray(charset("GBK")))
             }
-            sendData(48)
-            sendData("\n\n")
+            context.sendData(48)
+            context.sendData("\n\n")
         } catch (e: Exception) {
             throw e
         }
     }
 
     @Throws(Exception::class)
-    fun sendData(paperFeed: Int) {
+    fun Context.sendData(paperFeed: Int) {
         try {
             sendData(PrinterCommand.POS_Set_PrtAndFeedPaper(paperFeed))
             sendData(Command.GS_V_m_n)
@@ -237,7 +237,7 @@ class PrinterService: Service() {
     }
 
     @Throws(Exception::class)
-    fun sendData(byteAlign: Byte) {
+    fun Context.sendData(byteAlign: Byte) {
         try {
             Command.ESC_Align[2] = byteAlign
             sendData(Command.ESC_Align)
@@ -249,7 +249,7 @@ class PrinterService: Service() {
     }
 
     @Throws(Exception::class)
-    fun sendData(content: String?) {
+    fun Context.sendData(content: String?) {
         try {
             if (content != null && content.isNotEmpty()) {
                 sendData(content, "GBK")
@@ -260,7 +260,7 @@ class PrinterService: Service() {
     }
 
     @Throws(Exception::class)
-    fun sendData(content: String?, encoding: String) {
+    fun Context.sendData(content: String?, encoding: String) {
         try {
             if (content != null && content.isNotEmpty()) {
                 val data = PrinterCommand.POS_Print_Text("$content\n", encoding, 0, 1, 1, 0)
@@ -272,12 +272,12 @@ class PrinterService: Service() {
     }
 
     @Throws(Exception::class)
-    fun sendData(data: ByteArray?) {
+    fun Context.sendData(data: ByteArray?) {
         try {
             if (data != null && mBluetoothAdapter.isEnabled) {
                 if (mService.state == 3) mService.write(data)
                 else {
-                    init(getAddress)
+                    init(address)
                     if (BuildConfig.DEBUG) {
                         Log.e(mTagClass, "Device not connected")
                     }
@@ -358,14 +358,15 @@ class PrinterService: Service() {
         return instancePrinterService
     }
 
-    private fun String.saveAddress(){
-        val editor = getSharedPreferences(mTagClass, Context.MODE_PRIVATE).edit()
-        editor.putString("address", this)
-        editor.apply()
-    }
+    private var Context.address: String?
+        get() {
+            val prefs = getSharedPreferences(mTagClass, Context.MODE_PRIVATE)
+            return prefs.getString("address", null)
+        }
 
-    private val getAddress: String? get() {
-        val prefs = getSharedPreferences(mTagClass, Context.MODE_PRIVATE)
-        return prefs.getString("address", null)
-    }
+        set(address) {
+            val editor = getSharedPreferences(mTagClass, Context.MODE_PRIVATE).edit()
+            editor.putString("address", address)
+            editor.apply()
+        }
 }
