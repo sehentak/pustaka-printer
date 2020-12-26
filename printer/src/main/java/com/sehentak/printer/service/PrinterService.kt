@@ -40,9 +40,13 @@ class PrinterService: Service() {
         mService.stop()
     }
 
+    fun init(bluetoothAddress: String?): BluetoothService {
+        return init(applicationContext, bluetoothAddress)
+    }
+
     @Suppress("DEPRECATION")
     @RequiresPermission(anyOf = [Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN])
-    fun init(bluetoothAddress: String?): BluetoothService {
+    fun init(context: Context, bluetoothAddress: String?): BluetoothService {
         if (bluetoothAddress != null && !TextUtils.isEmpty(bluetoothAddress)) {
             mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
             if (mBluetoothAdapter.isEnabled) {
@@ -57,7 +61,9 @@ class PrinterService: Service() {
                 Log.e(mTagClass, mBluetoothAdapter.isEnabled.toString())
             }
 
-            if (mService.state == 3) address = bluetoothAddress
+            if (mService.state == 3) {
+                context.saveAddress(bluetoothAddress)
+            }
         }
 
         return mService
@@ -277,7 +283,7 @@ class PrinterService: Service() {
             if (data != null && mBluetoothAdapter.isEnabled) {
                 if (mService.state == 3) mService.write(data)
                 else {
-                    init(address)
+                    init(getAddress())
                     if (BuildConfig.DEBUG) {
                         Log.e(mTagClass, "Device not connected")
                     }
@@ -358,15 +364,16 @@ class PrinterService: Service() {
         return instancePrinterService
     }
 
-    private var Context.address: String?
-        get() {
-            val prefs = getSharedPreferences(mTagClass, Context.MODE_PRIVATE)
-            return prefs.getString("address", null)
-        }
-
-        set(address) {
+    private fun Context.saveAddress(address: String?) {
+        if (address != null) {
             val editor = getSharedPreferences(mTagClass, Context.MODE_PRIVATE).edit()
             editor.putString("address", address)
             editor.apply()
         }
+    }
+
+    private fun Context.getAddress(): String? {
+        val prefs = getSharedPreferences(mTagClass, Context.MODE_PRIVATE)
+        return prefs.getString("address", null)
+    }
 }
