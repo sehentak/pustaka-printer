@@ -22,9 +22,10 @@ import java.util.*
 
 class PrinterService: Service() {
     private val mTagClass = this::class.java.simpleName
-    private lateinit var instanceHandler: Handler
     private lateinit var mBluetoothAdapter: BluetoothAdapter
     private lateinit var instancePrinterService: BluetoothService
+    private lateinit var instanceHandler: Handler
+    private lateinit var instanceHandler2: Handler
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (BuildConfig.DEBUG) Log.e(mTagClass, "start: $startId")
@@ -44,25 +45,17 @@ class PrinterService: Service() {
         return init(applicationContext, bluetoothAddress)
     }
 
-    @Suppress("DEPRECATION")
     @RequiresPermission(anyOf = [Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN])
     fun init(context: Context, bluetoothAddress: String?): BluetoothService {
         if (bluetoothAddress != null && !TextUtils.isEmpty(bluetoothAddress)) {
+            context.saveAddress(bluetoothAddress)
             mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
             if (mBluetoothAdapter.isEnabled) {
                 mService.start()
-                Handler().postDelayed({
+                mHandler2.postDelayed({
                     val device = mBluetoothAdapter.getRemoteDevice(bluetoothAddress)
                     mService.connect(device)
                 }, 500)
-            }
-
-            if (BuildConfig.DEBUG) {
-                Log.e(mTagClass, mBluetoothAdapter.isEnabled.toString())
-            }
-
-            if (mService.state == 3) {
-                context.saveAddress(bluetoothAddress)
             }
         }
 
@@ -355,6 +348,14 @@ class PrinterService: Service() {
             instanceHandler = Handler()
         }
         return instanceHandler
+    }
+
+    @Suppress("DEPRECATION")
+    private val mHandler2: Handler get() {
+        if (!::instanceHandler.isInitialized) {
+            instanceHandler2 = Handler()
+        }
+        return instanceHandler2
     }
 
     private val mService: BluetoothService get() {
