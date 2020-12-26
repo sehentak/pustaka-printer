@@ -276,7 +276,7 @@ class PrinterService: Service() {
             if (data != null && mBluetoothAdapter.isEnabled) {
                 if (mService.state == 3) mService.write(data)
                 else {
-                    init(getAddress())
+                    init(this, getAddress())
                     if (BuildConfig.DEBUG) {
                         Log.e(mTagClass, "Device not connected")
                     }
